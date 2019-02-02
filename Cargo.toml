@@ -1,0 +1,15 @@
+[package]
+name = "urltemplate"
+version = "0.1.0"
+authors = ["Vladimir Ignatev <ya.na.pochte@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+url = "1.7.2"
+
+[dev-dependencies]
+criterion = "0.2.9"
+
+[[bench]]
+name = "simple"
+harness = false
