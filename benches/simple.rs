@@ -11,7 +11,7 @@ use urltemplate::UrlTemplate;
 fn bench(c: &mut Criterion) {
     c.bench_function("substitute", move |b| {
         let mut params = HashMap::new();
-        let mut url_with_placeholders = String::from("http://example.com/?");
+        let mut url_with_placeholders = UrlTemplate::from("http://example.com/?");
         for i in 0..15 {
             params.insert(format!("subid{}", i), format!("value{}", i));
             url_with_placeholders = url_with_placeholders.add(&format!("subid{}", i));
@@ -24,7 +24,7 @@ fn bench(c: &mut Criterion) {
 
     c.bench_function("substitute_str", move |b| {
         let mut params = HashMap::new();
-        let mut url_with_placeholders = String::from("http://example.com/?");
+        let mut url_with_placeholders = UrlTemplate::from("http://example.com/?");
         for i in 0..15 {
             params.insert(format!("subid{}", i), format!("value{}", i));
             url_with_placeholders = url_with_placeholders.add(&format!("subid{}", i));

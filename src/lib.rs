@@ -9,7 +9,7 @@
 //!
 //! let mut params = HashMap::new();
 //! params.insert("source".to_string(), "url-template-crate-❤".to_string());
-//! let url_with_placeholders = String::from("https://www.mozilla.org/?utm_source={source}");
+//! let url_with_placeholders = UrlTemplate::from("https://www.mozilla.org/?utm_source={source}");
 //! let url =  url_with_placeholders.substitute_str(&params).expect("valid url");
 //! assert_eq!(url, "https://www.mozilla.org/?utm_source=url-template-crate-❤")
 //! ```
@@ -25,11 +25,11 @@ use std::ops::Add;
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum UrlTemplateErrorKind {
-    // provided String is not an URL
+    /// provided String is not an URL
     IsNotAnUrl,
-    // provided URL scheme is differ from expected `http` or `https`
+    /// provided URL scheme is differ from expected `http` or `https`
     InvalidScheme,
-    // provided pattern has incorrect syntax
+    /// provided pattern has incorrect syntax
     InvalidPattern
 }
 
@@ -80,13 +80,28 @@ impl error::Error for UrlTemplateError {
     fn source(&self) -> Option<&(Error + 'static)> { None }
 }
 
-pub trait UrlTemplate {
-    fn substitute(&self, values: &HashMap<String, String>) -> Result<Url, UrlTemplateError>;
-    fn substitute_str(&self, values: &HashMap<String, String>) -> Result<String, UrlTemplateError>;
+pub struct UrlTemplate {
+    _tpl: String
 }
 
-impl UrlTemplate for String {
-    fn substitute(&self, values: &HashMap<String, String>) -> Result<Url, UrlTemplateError> {
+impl From<String> for UrlTemplate {
+    fn from(s: String) -> UrlTemplate {
+        UrlTemplate {
+            _tpl: s
+        }
+    }
+}
+
+impl From<&str> for UrlTemplate {
+    fn from(s: &str) -> UrlTemplate {
+        UrlTemplate {
+            _tpl: String::from(s)
+        }
+    }
+}
+
+impl UrlTemplate {
+    pub fn substitute(&self, values: &HashMap<String, String>) -> Result<Url, UrlTemplateError> {
         match self.substitute_str(values) {
             Ok(url_string) => {
                 Ok(Url::parse(url_string.as_str()).expect("Valid URL string"))
@@ -97,9 +112,9 @@ impl UrlTemplate for String {
         }
     }
 
-    fn substitute_str(&self, values: &HashMap<String, String>) -> Result<String, UrlTemplateError> {
+    pub fn substitute_str(&self, values: &HashMap<String, String>) -> Result<String, UrlTemplateError> {
         // sanity check
-        match Url::parse(self) {
+        match Url::parse(self._tpl.as_str()) {
             Ok(parsed) => {
                 let scheme_valid = parsed.scheme() == "http" || parsed.scheme() == "https";
                 if !scheme_valid {
@@ -111,7 +126,7 @@ impl UrlTemplate for String {
             }
         }
 
-        let mut chars = self.char_indices();
+        let mut chars = self._tpl.char_indices();
         let mut out = String::new();
 
         let mut current_placeholder = String::new();
@@ -155,7 +170,7 @@ impl UrlTemplate for String {
         }
 
         if inside_placeholder {
-            return Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, self.len() - 1)));
+            return Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, self._tpl.len() - 1)));
         }
 
         Ok(out)
@@ -173,15 +188,15 @@ mod tests {
         params.insert("key1".to_string(), "value1".to_string());
         params.insert("key2".to_string(), "value2".to_string());
 
-        assert_eq!(String::from("data:text/plain,Hello?World#").substitute_str(&params), Err(UrlTemplateError::from(UrlTemplateErrorKind::InvalidScheme)));
-        assert_eq!(String::from("Ôunfortunately").substitute_str(&params), Err(UrlTemplateError::from(UrlTemplateErrorKind::IsNotAnUrl)));
+        assert_eq!(UrlTemplate::from("data:text/plain,Hello?World#").substitute_str(&params), Err(UrlTemplateError::from(UrlTemplateErrorKind::InvalidScheme)));
+        assert_eq!(UrlTemplate::from("Ôunfortunately").substitute_str(&params), Err(UrlTemplateError::from(UrlTemplateErrorKind::IsNotAnUrl)));
 
-        assert_eq!(String::from("http://google.com/?utm_source={key1}&utm_medium={key2}&someotherparam={key3}").substitute_str(&params).expect("ok"), "http://google.com/?utm_source=value1&utm_medium=value2&someotherparam=");
-        assert_eq!(String::from("http://google.com").substitute_str(&params).expect("ok"), String::from("http://google.com"));
+        assert_eq!(UrlTemplate::from("http://google.com/?utm_source={key1}&utm_medium={key2}&someotherparam={key3}").substitute_str(&params).expect("ok"), "http://google.com/?utm_source=value1&utm_medium=value2&someotherparam=");
+        assert_eq!(UrlTemplate::from("http://google.com").substitute_str(&params).expect("ok"), String::from("http://google.com"));
 
-        assert_eq!(String::from("http://google.com/?utm_source={key1{}").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 35))));
-        assert_eq!(String::from("http://google.com/?utm_source=key1{").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 34))));
-        assert_eq!(String::from("http://google.com/?utm_source=key1}").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 34))));
+        assert_eq!(UrlTemplate::from("http://google.com/?utm_source={key1{}").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 35))));
+        assert_eq!(UrlTemplate::from("http://google.com/?utm_source=key1{").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 34))));
+        assert_eq!(UrlTemplate::from("http://google.com/?utm_source=key1}").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 34))));
     }
 
 }
