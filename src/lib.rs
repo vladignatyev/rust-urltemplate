@@ -80,6 +80,7 @@ impl error::Error for UrlTemplateError {
     fn source(&self) -> Option<&(Error + 'static)> { None }
 }
 
+#[derive(Debug)]
 pub struct UrlTemplate {
     _tpl: String
 }
@@ -99,6 +100,26 @@ impl From<&str> for UrlTemplate {
         }
     }
 }
+
+impl Into<String> for UrlTemplate {
+    fn into(self) -> String {
+        self._tpl.clone()
+    }
+}
+
+impl From<&UrlTemplate> for String {
+    fn from(tpl: &UrlTemplate) -> String {
+        tpl._tpl.clone()
+    }
+}
+
+impl PartialEq for UrlTemplate {
+    fn eq(&self, other: &UrlTemplate) -> bool {
+        let s: String = other.into();
+        self._tpl == s
+    }
+}
+
 
 impl UrlTemplate {
     pub fn substitute(&self, values: &HashMap<String, String>) -> Result<Url, UrlTemplateError> {
@@ -197,6 +218,8 @@ mod tests {
         assert_eq!(UrlTemplate::from("http://google.com/?utm_source={key1{}").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 35))));
         assert_eq!(UrlTemplate::from("http://google.com/?utm_source=key1{").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 34))));
         assert_eq!(UrlTemplate::from("http://google.com/?utm_source=key1}").substitute_str(&params), Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, 34))));
+
+        assert_eq!(UrlTemplate::from("http://google.com/?utm_source={key1}"), String::from("http://google.com/?utm_source={key1}").into());
     }
 
 }
