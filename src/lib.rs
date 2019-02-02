@@ -120,6 +120,12 @@ impl PartialEq for UrlTemplate {
     }
 }
 
+impl ToString for UrlTemplate {
+    fn to_string(&self) -> String {
+        self._tpl.clone()
+    }
+}
+
 
 impl UrlTemplate {
     pub fn substitute(&self, values: &HashMap<String, String>) -> Result<Url, UrlTemplateError> {
