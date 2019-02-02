@@ -4,6 +4,24 @@ version = "0.1.0"
 authors = ["Vladimir Ignatev <ya.na.pochte@gmail.com>"]
 edition = "2018"
 
+description = "Lightweight URL templates. Master URLs with placeholders!"
+license = "MIT"
+
+keywords = ["url", "template", "string"]
+categories = ["parser-implementations", "web-programming", "encoding"]
+
+homepage = "https://github.com/vladignatyev/rust-urltemplate"
+repository = "https://github.com/vladignatyev/rust-urltemplate.git"
+documentation = "https://docs.rs/urltemplate/0.1.0/urltemplate/"
+readme = "README.md"
+
+[lib]
+name = "urltemplate"
+path = "src/lib.rs"
+test = true
+doctest = true
+doc = true
+
 [dependencies]
 url = "1.7.2"
 
