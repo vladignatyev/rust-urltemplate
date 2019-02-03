@@ -22,6 +22,11 @@ use std::error::{self, Error};
 
 use std::ops::Add;
 
+#[macro_use] extern crate serde_derive;
+
+extern crate serde;
+extern crate serde_json;
+
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum UrlTemplateErrorKind {
@@ -126,6 +131,14 @@ impl ToString for UrlTemplate {
     }
 }
 
+impl serde::Serialize for UrlTemplate {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self._tpl)
+    }
+}
 
 impl UrlTemplate {
     pub fn substitute(&self, values: &HashMap<String, String>) -> Result<Url, UrlTemplateError> {
