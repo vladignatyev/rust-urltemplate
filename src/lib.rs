@@ -22,11 +22,6 @@ use std::error::{self, Error};
 
 use std::ops::Add;
 
-#[macro_use] extern crate serde_derive;
-
-extern crate serde;
-extern crate serde_json;
-
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum UrlTemplateErrorKind {
@@ -86,58 +81,41 @@ impl error::Error for UrlTemplateError {
 }
 
 #[derive(Debug)]
-pub struct UrlTemplate {
-    _tpl: String
-}
+pub struct UrlTemplate(String);
 
 impl From<String> for UrlTemplate {
     fn from(s: String) -> UrlTemplate {
-        UrlTemplate {
-            _tpl: s
-        }
+        UrlTemplate(s)
     }
 }
 
 impl From<&str> for UrlTemplate {
     fn from(s: &str) -> UrlTemplate {
-        UrlTemplate {
-            _tpl: String::from(s)
-        }
+        UrlTemplate(String::from(s))
     }
 }
 
 impl Into<String> for UrlTemplate {
     fn into(self) -> String {
-        self._tpl.clone()
-    }
-}
-
-impl From<&UrlTemplate> for String {
-    fn from(tpl: &UrlTemplate) -> String {
-        tpl._tpl.clone()
+        self.0.clone()
     }
 }
 
 impl PartialEq for UrlTemplate {
     fn eq(&self, other: &UrlTemplate) -> bool {
         let s: String = other.into();
-        self._tpl == s
+        self.0 == s
     }
 }
 
 impl ToString for UrlTemplate {
     fn to_string(&self) -> String {
-        self._tpl.clone()
+        self.0.clone()
     }
 }
 
-impl serde::Serialize for UrlTemplate {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(&self._tpl)
-    }
+impl From<&UrlTemplate> for String {
+    fn from(tpl: &UrlTemplate) -> String { tpl.to_string() }
 }
 
 impl UrlTemplate {
@@ -154,7 +132,7 @@ impl UrlTemplate {
 
     pub fn substitute_str(&self, values: &HashMap<String, String>) -> Result<String, UrlTemplateError> {
         // sanity check
-        match Url::parse(self._tpl.as_str()) {
+        match Url::parse(self.0.as_str()) {
             Ok(parsed) => {
                 let scheme_valid = parsed.scheme() == "http" || parsed.scheme() == "https";
                 if !scheme_valid {
@@ -166,7 +144,7 @@ impl UrlTemplate {
             }
         }
 
-        let mut chars = self._tpl.char_indices();
+        let mut chars = self.0.char_indices();
         let mut out = String::new();
 
         let mut current_placeholder = String::new();
@@ -210,7 +188,7 @@ impl UrlTemplate {
         }
 
         if inside_placeholder {
-            return Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, self._tpl.len() - 1)));
+            return Err(UrlTemplateError::from((UrlTemplateErrorKind::InvalidPattern, self.0.len() - 1)));
         }
 
         Ok(out)
