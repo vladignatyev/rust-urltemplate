@@ -3,7 +3,7 @@ Convert URL template containing placeholders into url.
 Whenever you need to turn `https://example.com/?utm_source={source}&key2={value2}` into URL like `https://example.com/?utm_source=github&key2=`
 
 # Usage
-```
+```rust
 extern crate urltemplate;
 use urltemplate::UrlTemplate;
 use std::collections::HashMap;
