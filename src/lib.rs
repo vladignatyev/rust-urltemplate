@@ -24,7 +24,7 @@ use std::ops::Add;
 
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UrlTemplate(pub String);
 
 

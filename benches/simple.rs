@@ -11,12 +11,14 @@ use urltemplate::UrlTemplate;
 fn bench(c: &mut Criterion) {
     c.bench_function("substitute", move |b| {
         let mut params = HashMap::new();
-        let mut url_with_placeholders = UrlTemplate::from("http://example.com/?");
+
+        let mut tpl: String = "http://example.com/?".to_string();
         for i in 0..15 {
             params.insert(format!("subid{}", i), format!("value{}", i));
-            url_with_placeholders = url_with_placeholders.add(&format!("subid{}", i));
+            tpl = tpl.add(&format!("subid{}", i));
         }
 
+        let url_with_placeholders = UrlTemplate::from(tpl);
         b.iter(|| {
             url_with_placeholders.substitute(&params).expect("valid url");
         });
@@ -24,12 +26,15 @@ fn bench(c: &mut Criterion) {
 
     c.bench_function("substitute_str", move |b| {
         let mut params = HashMap::new();
-        let mut url_with_placeholders = UrlTemplate::from("http://example.com/?");
+
+
+        let mut tpl: String = "http://example.com/?".to_string();
         for i in 0..15 {
             params.insert(format!("subid{}", i), format!("value{}", i));
-            url_with_placeholders = url_with_placeholders.add(&format!("subid{}", i));
+            tpl = tpl.add(&format!("subid{}", i));
         }
 
+        let url_with_placeholders = UrlTemplate::from(tpl);
         b.iter(|| {
             url_with_placeholders.substitute_str(&params).expect("valid url");
         });
