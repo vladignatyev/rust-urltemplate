@@ -8,7 +8,7 @@ Comfortable means to be easily used in any web-related project, UTF-safe.
 ## Warning: This crate is experimental. Also, it is being actively developed.
 
 # Usage
-```
+```rust
 extern crate urltemplate;
 
 use urltemplate::UrlTemplate;
